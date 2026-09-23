@@ -1,8 +1,9 @@
+from pathlib import Path
 from uuid import UUID
 
 from fastapi import FastAPI, HTTPException
 
-from app.detection.rules import RuleDetector
+from app.detection.engine import DetectionEngine
 from app.events.service import EventService
 from app.events.store import EventStore
 from app.incidents.models import Incident
@@ -20,8 +21,16 @@ generator = TrafficGenerator()
 
 event_service = EventService(EventStore())
 incident_store = IncidentStore()
+
+model_path = Path("models/intrusion.joblib")
+
+if not model_path.exists():
+    raise RuntimeError(
+        "ML model not found. Run: python -m scripts.train_model"
+    )
+
 processor = EventProcessor(
-    detector=RuleDetector(),
+    detector=DetectionEngine(model_path),
     incidents=incident_store,
 )
 

@@ -1,7 +1,7 @@
 from datetime import datetime, timezone
 
+from app.detection.engine import DetectionEngine
 from app.detection.models import DetectionType
-from app.detection.rules import RuleDetector
 from app.incidents.models import Incident
 from app.incidents.store import IncidentStore
 from app.models.network import NetworkFlow
@@ -10,7 +10,7 @@ from app.models.network import NetworkFlow
 class EventProcessor:
     def __init__(
         self,
-        detector: RuleDetector,
+        detector: DetectionEngine,
         incidents: IncidentStore,
     ) -> None:
         self._detector = detector

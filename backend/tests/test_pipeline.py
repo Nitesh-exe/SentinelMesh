@@ -1,7 +1,8 @@
+from pathlib import Path
 from datetime import datetime, timezone
-
-from app.detection.rules import RuleDetector
+from app.detection.engine import DetectionEngine
 from app.incidents.store import IncidentStore
+from app.ml.trainer import train_model
 from app.models.network import NetworkFlow
 from app.pipeline.processor import EventProcessor
 
@@ -26,7 +27,13 @@ def make_flow(
 
 def test_suspicious_flow_creates_incident() -> None:
     store = IncidentStore()
-    processor = EventProcessor(RuleDetector(), store)
+    model_path = Path("models/test_pipeline.joblib")
+    train_model(model_path)
+
+    processor = EventProcessor(
+        DetectionEngine(model_path),
+        store,
+    )
 
     incident = processor.process(
         make_flow(packets=1, bytes=60, duration=0.01)
@@ -38,7 +45,13 @@ def test_suspicious_flow_creates_incident() -> None:
 
 def test_normal_flow_does_not_create_incident() -> None:
     store = IncidentStore()
-    processor = EventProcessor(RuleDetector(), store)
+    model_path = Path("models/test_pipeline.joblib")
+    train_model(model_path)
+
+    processor = EventProcessor(
+        DetectionEngine(model_path),
+        store,
+    )
 
     incident = processor.process(
         make_flow(packets=10, bytes=1000, duration=1)
